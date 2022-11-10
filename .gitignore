@@ -1,0 +1,9 @@
+﻿.vs/
+App.config
+NET6_Task1.csproj
+NET6_Task1.sln
+Properties/
+bin/
+obj/
+.Designer.gitignore
+.resx
