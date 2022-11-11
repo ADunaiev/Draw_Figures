@@ -20,8 +20,6 @@ using System.Threading.Tasks;
 
 namespace NET6_Task1
 {
-    
-
     class Point
     {
         public double x { get; set; }
@@ -41,6 +39,12 @@ namespace NET6_Task1
         public override string ToString()
         {
             return $"({x},{y})";
+        }
+        public Point(string str)
+        {
+            string[] strArr = str.Split(',');
+            this.x = Convert.ToDouble(strArr[0]);
+            this.y = Convert.ToDouble(strArr[1]);
         }
         public double distance(Point a)
         {
@@ -71,11 +75,10 @@ namespace NET6_Task1
     {
         public abstract double Figure_Square();
         public abstract double Figure_Perimeter();
+        public abstract void Draw(int NumPoints);
 
     }
-
-
-    class Triangle : Geometric_Figure, IDrawable
+    class Triangle : Geometric_Figure
 
     {
         private Point p1;
@@ -120,7 +123,7 @@ namespace NET6_Task1
             Console.WriteLine(temp);
             return temp;
         }
-        public void Draw(int NumberPoints)
+        public override void Draw(int NumberPoints)
         {
             Console.ForegroundColor = consoleColor;
 
@@ -130,42 +133,7 @@ namespace NET6_Task1
             Console.ResetColor();
         }
     }
-    class Square : Geometric_Figure
-    {
-        private Point p1;
-        private Point p2;
-        private Point p3;
-        private Point p4;
-        private double side;
-        public Square(Point _p1, double _side)
-        {
-            p1 = _p1;
-            side = _side;
-            p2 = new Point(_p1.x + _side, _p1.y);
-            p3 = new Point(_p1.x + _side, _p1.y + _side);
-            p4 = new Point(_p1.x, _p1.y + _side);
-        }
-
-        public override double Figure_Square()
-        {
-            return Math.Pow(side, 2);
-        }
-        public override double Figure_Perimeter()
-        {
-            return side * 4;
-        }
-
-        public override string ToString()
-        {
-            string temp;
-            Console.WriteLine("Это квадрат. Его точки:");
-            temp = p1.ToString() + " " + p2.ToString() + " " + p3.ToString()
-                + " " + p4.ToString() + $"\nСторона кваррата равна {side}.";
-            Console.WriteLine(temp);
-            return temp;
-        }
-    }
-    class Diamond : Geometric_Figure, IDrawable
+    class Diamond : Geometric_Figure
     {
         private Point p1;
         private Point p2;
@@ -209,7 +177,7 @@ namespace NET6_Task1
             Console.WriteLine(temp);
             return temp;
         }
-        public void Draw(int NumberPoints)
+        public override void Draw(int NumberPoints)
         {
             Console.ForegroundColor = consoleColor;
 
@@ -261,7 +229,7 @@ namespace NET6_Task1
             Console.WriteLine(temp);
             return temp;
         }
-        public void Draw(int NumberPoints)
+        public override void Draw(int NumberPoints)
         {
             Console.ForegroundColor = consoleColor;
 
@@ -273,48 +241,7 @@ namespace NET6_Task1
             Console.ResetColor();
         }
     }
-    class Parallelogram : Geometric_Figure
-    {
-        private Point p1;
-        private Point p2;
-        private Point p3;
-        private Point p4;
-        private double side1;
-        private double side2;
-        private double height;
-        public Parallelogram(Point _p1, Point _p2, Point _p4)
-        {
-            p1 = _p1;
-            p2 = _p2;
-            p4 = _p4;
-            height = Math.Abs(p1.y - p4.y);
-            side2 = p1.distance(p4);
-            side1 = p1.distance(p2);
-            p3 = new Point(p2.x + p4.x - p1.x, p4.y);
-        }
-
-        public override double Figure_Square()
-        {
-            return side1 * height;
-        }
-        public override double Figure_Perimeter()
-        {
-            return 2 * (side1 + side2);
-        }
-        public override string ToString()
-        {
-            string temp;
-            Console.WriteLine("Это параллелограмм. Его точки:");
-            temp = p1.ToString() + " " + p2.ToString() + " " + p3.ToString()
-                + " " + p4.ToString()
-                + $"\nПервая сторона равна {side1}."
-                + $"\nВторая сторона равна {side2}."
-                + $"\nВысота параллелограмма {height}.";
-            Console.WriteLine(temp);
-            return temp;
-        }
-    }
-    class Trapezoid : Geometric_Figure
+    class Trapezoid : Geometric_Figure, IDrawable
     {
         private Point p1;
         private Point p2;
@@ -324,7 +251,8 @@ namespace NET6_Task1
         private double side_down;
         private double side;
         private double height;
-        public Trapezoid(Point _p1, Point _p2, Point _p4)
+        private ConsoleColor consoleColor;
+        public Trapezoid(Point _p1, Point _p2, Point _p4, ConsoleColor _consoleColor)
         {
             p1 = _p1;
             p2 = _p2;
@@ -334,6 +262,7 @@ namespace NET6_Task1
             side_down = p1.distance(p2);
             p3 = new Point(p2.x - (p4.x - p1.x), p4.y);
             side_up = p4.distance(p3);
+            consoleColor = _consoleColor;
         }
 
         public override double Figure_Square()
@@ -357,153 +286,219 @@ namespace NET6_Task1
             Console.WriteLine(temp);
             return temp;
         }
-    }
-    class Circle : Geometric_Figure
-    {
-        private Point center;
-        private double radius;
-        public Circle(Point _center, double _radius)
+        public override void Draw(int NumberPoints)
         {
-            center = _center;
-            radius = _radius;
-        }
+            Console.ForegroundColor = consoleColor;
 
-        public override double Figure_Square()
-        {
-            return Math.PI * Math.Pow(radius, 2);
+            p1.DrawLine(p2, NumberPoints);
+            p2.DrawLine(p3, NumberPoints);
+            p3.DrawLine(p4, NumberPoints);
+            p1.DrawLine(p4, NumberPoints);
+            Console.ResetColor();
         }
-        public override double Figure_Perimeter()
+    }
+    class Polygon : Geometric_Figure, IDrawable
+
+    {
+        private Point[] point;
+        int NumberOfVertex;
+        private ConsoleColor consoleColor;
+
+        public Polygon(Point[] _point, int _numbVertex, ConsoleColor _consoleColor)
         {
-            return 2 * Math.PI * radius;
+            NumberOfVertex = _numbVertex;
+            point = _point;
+            consoleColor = _consoleColor;
+        }
+        public override double Figure_Square() {
+            return 0;
+        }
+        public override double Figure_Perimeter() 
+        {
+            return 0;
         }
         public override string ToString()
         {
-            string temp;
-            Console.WriteLine("Это круг. Его центр:");
-            temp = center.ToString()
-                + $"\nРадиус круга {radius}.";
+            string temp = String.Empty;
+            Console.WriteLine("Это многоугольник. Его точки:");
+            foreach (Point p in point)
+            {
+                temp += p.ToString() + " ";
+            }
             Console.WriteLine(temp);
             return temp;
         }
-    }
-    class Ellipse : Geometric_Figure
-    {
-        private double eccentricity;
-        private Point focus1;
-        private Point focus2;
-        private Point center;
-        private Point up;
-        private Point down;
-        private Point left;
-        private Point right;
-        private double radius1;
-        private double radius2;
-        public Ellipse(Point _focus1, Point _focus2, double _eccentricity)
+        public override void Draw(int NumberPoints)
         {
-            focus1 = _focus1;
-            focus2 = _focus2;
-            eccentricity = _eccentricity;
-            center = new Point((focus1.x + focus2.x) / 2, focus1.y);
-            radius1 = center.distance(focus1) / eccentricity;
-            left = new Point(center.x - radius1, center.y);
-            right = new Point(center.x + radius1, center.y);
-            radius2 = Math.Sqrt(radius1 * radius1 -
-                Math.Pow(focus1.distance(center), 2));
-            up = new Point(center.x, center.y + radius2);
-            down = new Point(center.x, center.y - radius2);
-        }
+            Console.ForegroundColor = consoleColor;
 
-        public override double Figure_Square()
-        {
-            return Math.PI * radius1 * radius2;
-        }
-        public override double Figure_Perimeter()
-        {
-            double perim = Math.PI * radius1 * radius2;
-            perim += Math.Pow(radius1 - radius2, 2);
-            perim /= (radius1 + radius2);
-
-            return perim * 4;
-        }
-        public override string ToString()
-        {
-            string temp;
-            Console.Write("Это эллипс. Его центр:");
-            temp = center.ToString()
-                + $"\nПервый фокус эллипса {focus1}"
-                + $"\nВторой фокус эллипса {focus2}"
-                + $"\nПервый радиус эллипса {radius1}."
-                + $"\nВторой радиус эллипса {radius2}."
-                + $"\nВерхняя вершина эллипса {up}"
-                + $"\nНижняя вершина эллипса {down}"
-                + $"\nЛевая вершина эллипса {left}"
-                + $"\nПравая вершина эллипса {right}"
-                + $"\nЭксцентриситет эллипса {eccentricity}";
-            Console.WriteLine(temp);
-            return temp;
-        }
-    }
-
-    class CompositeFigure : Geometric_Figure
-    {
-        private Geometric_Figure[] geoFigures;
-        public CompositeFigure(Geometric_Figure[] _geoFigures)
-        {
-            geoFigures = _geoFigures;
-        }
-        public override double Figure_Square()
-        {
-            double sum = 0;
-            foreach (var it in geoFigures)
+            for (int i = 0; i < NumberOfVertex; i++)
             {
-                sum += it.Figure_Square();
+                if(i == NumberOfVertex-1)
+                {
+                    point[i].DrawLine(point[0], NumberPoints);
+                }
+                else
+                {
+                    point[i].DrawLine(point[i + 1], NumberPoints);
+                }
             }
 
-            return sum;
-        }
-        public override double Figure_Perimeter()
-        {
-            double sum = 0;
-            foreach (var it in geoFigures)
-                sum += it.Figure_Perimeter();
-            return sum;
-        }
-        public override string ToString()
-        {
-            string temp_s = "Это сложная фигура! Она состоит из следующих фигур:\n";
-            Console.WriteLine(temp_s);
-            foreach (var it in geoFigures)
-            {
-                temp_s += it.ToString();
-                Console.WriteLine();
-            }
-            return temp_s;
+            Console.ResetColor();
         }
     }
+
+    class CollectionOfGeometricFigures
+    {
+        public List<Geometric_Figure> Figures{ get; set; }
+        public CollectionOfGeometricFigures(List<Geometric_Figure> figures)
+        {
+            Figures = figures;
+        }
+        public CollectionOfGeometricFigures()
+        {
+            Figures = new List<Geometric_Figure>();
+        }
+
+        public void ShowAllFigures()
+        {
+            Console.Clear();
+            foreach (Geometric_Figure f in Figures)
+                f.Draw(50);
+        }
+    }
+
     internal class NET6_Task1
     {
-       
+        static public void Menu()
+        {
+            Console.WriteLine("Выберите фигуру:");
+            Console.WriteLine("1. Треугольник");
+            Console.WriteLine("2. Ромб");
+            Console.WriteLine("3. Прямоугольник");
+            Console.WriteLine("4. Трапеция");
+            Console.WriteLine("5. Многоугольник");
+            Console.WriteLine("9. Распечатать все внесенные фигуры");
+            Console.WriteLine("0. Завершить программу\n\n" +
+                "Ваш выбор: ");
+        }
         static void Main(string[] args)
         {
             Console.WindowHeight = 54;
             Console.WindowWidth = 150;
+            ConsoleColor[] colors = (ConsoleColor[])ConsoleColor.GetValues(typeof(ConsoleColor));
 
-            Point p1 = new Point(0, 0);
-            Point p2 = new Point(10, 20);
-            Point p3 = new Point(70, 30);
-            Point p4 = new Point(50, 10);
-            Point p5 = new Point(-4, 0);
+            CollectionOfGeometricFigures userFigures = new CollectionOfGeometricFigures();
 
-            Rectangle r1 = new Rectangle(p1, 10, 20, ConsoleColor.Blue);
-            r1.Draw(50);
+            int choice = 0;
 
-            Diamond d1 = new Diamond(p3, 10, 8, ConsoleColor.Black);
-            d1.Draw(20);
+            while (true)
+            {
+                Console.Clear();
+                Menu();
+                choice = Convert.ToInt32(Console.ReadLine());
+                switch (choice)
+                {
+                    case 1:
+                        {
+                            Console.WriteLine("Вы выбрали треугольник.\n" +
+                                "Задайте его параметры :");
 
-            Triangle t1 = new Triangle(p4, p2, p3, ConsoleColor.Green);
-            t1.Draw(30);
+                            Console.Write("Вершина 1 (разделитель - ','): ");
+                            string TempStr = Console.ReadLine();
+                            Point point1 = new Point(TempStr);
 
+                            Console.Write("Вершина 2 (разделитель - ','): ");
+                            TempStr = Console.ReadLine();
+                            Point point2 = new Point(TempStr);
 
+                            Console.Write("Вершина 3 (разделитель - ','): ");
+                            TempStr = Console.ReadLine();
+                            Point point3 = new Point(TempStr);
+
+                            Console.WriteLine("Выберите цвет фигуры. Внесите число от 0 до 14: ");
+                            int consoleColor = Convert.ToInt32(Console.ReadLine());
+
+                            if (consoleColor >= 0 && consoleColor <= 14)
+                            {
+                                Triangle triangle = new Triangle(point1, point2, point3,
+                                  colors[consoleColor]);
+                                userFigures.Figures.Add(triangle);
+                            }
+                        }
+                        break;
+                    case 2:
+                        {
+                            Console.WriteLine("Вы выбрали ромб.\n" +
+                                   "Задайте его параметры: ");
+
+                            Console.Write("Центр ромба (разделитель - ','): ");
+                            string TempStr = Console.ReadLine();
+                            Point point1 = new Point(TempStr);
+
+                            Console.Write("Радиус1: ");
+                            int radius1 = Convert.ToInt32(Console.ReadLine());
+
+                            Console.Write("Радиус2: ");
+                            int radius2 = Convert.ToInt32(Console.ReadLine());
+
+                            Console.WriteLine("Выберите цвет фигуры. Внесите число от 0 до 14: ");
+                            int consoleColor = Convert.ToInt32(Console.ReadLine());
+
+                            if (consoleColor >= 0 && consoleColor <= 14)
+                            {
+                                Diamond diamond = new Diamond(point1, radius1, radius2,
+                                  colors[consoleColor]);
+                                userFigures.Figures.Add(diamond);
+                            }
+                        }
+                        break;
+                    case 3:
+                        {
+                            Console.WriteLine("Вы выбрали прямоугольник.\n" +
+                                     "Задайте его параметры: ");
+
+                            Console.Write("Вершина прямоугольника (разделитель - ','): ");
+                            string TempStr = Console.ReadLine();
+                            Point point1 = new Point(TempStr);
+
+                            Console.Write("Сторона1: ");
+                            int side1 = Convert.ToInt32(Console.ReadLine());
+
+                            Console.Write("Сторона2: ");
+                            int side2 = Convert.ToInt32(Console.ReadLine());
+
+                            Console.WriteLine("Выберите цвет фигуры. Внесите число от 0 до 14: ");
+                            int consoleColor = Convert.ToInt32(Console.ReadLine());
+
+                            if (consoleColor >= 0 && consoleColor <= 14)
+                            {
+                                Rectangle rectangle = new Rectangle(point1, side1, side2,
+                                  colors[consoleColor]);
+                                userFigures.Figures.Add(rectangle);
+                            }
+                        }
+                        break;
+                    case 4:
+                        {
+
+                        }
+                        break;
+                    case 5:
+                        { }
+                        break;
+                    case 9:
+                        userFigures.ShowAllFigures();
+                        return;
+                    case 0:
+                        return;
+                    default:
+                        {
+                            Console.WriteLine("Неверный выбор. Повторите попытку.");
+                        }
+                        break;
+                }
+            }
         }
     }
 }
