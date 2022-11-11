@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -260,7 +260,7 @@ namespace NET6_Task1
             height = Math.Abs(p1.y - p4.y);
             side = p1.distance(p4);
             side_down = p1.distance(p2);
-            p3 = new Point(p2.x - (p4.x - p1.x), p4.y);
+            p3 = new Point(p2.x + (p1.x - p4.x), p4.y);
             side_up = p4.distance(p3);
             consoleColor = _consoleColor;
         }
@@ -279,8 +279,8 @@ namespace NET6_Task1
             Console.WriteLine("Это трапеция. Ее точки:");
             temp = p1.ToString() + " " + p2.ToString() + " " + p3.ToString()
                 + " " + p4.ToString()
-                + $"\nВерхняя сторона равна {side_up}."
-                + $"\nНижняя сторона равна {side_down}."
+                + $"\nНижняя сторона равна {side_up}."
+                + $"\nВерхняя сторона равна {side_down}."
                 + $"\nБоковая сторона равна {side}."
                 + $"\nВысота трапеции {height}.";
             Console.WriteLine(temp);
@@ -348,16 +348,16 @@ namespace NET6_Task1
         }
     }
 
-    class CollectionOfGeometricFigures
+    class CollectionOfGeometricFigures:IEnumerable
     {
-        public List<Geometric_Figure> Figures{ get; set; }
-        public CollectionOfGeometricFigures(List<Geometric_Figure> figures)
+        public Geometric_Figure[] Figures{ get; set; }
+        public CollectionOfGeometricFigures(Geometric_Figure[] figures)
         {
             Figures = figures;
         }
-        public CollectionOfGeometricFigures()
+        public CollectionOfGeometricFigures(int size)
         {
-            Figures = new List<Geometric_Figure>();
+            Figures = new Geometric_Figure[size];
         }
 
         public void ShowAllFigures()
@@ -366,19 +366,21 @@ namespace NET6_Task1
             foreach (Geometric_Figure f in Figures)
                 f.Draw(50);
         }
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return Figures.GetEnumerator();
+        }
     }
 
     internal class NET6_Task1
     {
         static public void Menu()
-        {
-            Console.WriteLine("Выберите фигуру:");
+        {       
             Console.WriteLine("1. Треугольник");
             Console.WriteLine("2. Ромб");
             Console.WriteLine("3. Прямоугольник");
             Console.WriteLine("4. Трапеция");
             Console.WriteLine("5. Многоугольник");
-            Console.WriteLine("9. Распечатать все внесенные фигуры");
             Console.WriteLine("0. Завершить программу\n\n" +
                 "Ваш выбор: ");
         }
@@ -387,14 +389,18 @@ namespace NET6_Task1
             Console.WindowHeight = 54;
             Console.WindowWidth = 150;
             ConsoleColor[] colors = (ConsoleColor[])ConsoleColor.GetValues(typeof(ConsoleColor));
-
-            CollectionOfGeometricFigures userFigures = new CollectionOfGeometricFigures();
-
+           
             int choice = 0;
 
-            while (true)
+            Console.WriteLine("Сколько фигур Вы хотите внести?\n" +
+                "Ответ: ");
+            int FigNumber = Convert.ToInt32(Console.ReadLine());
+            CollectionOfGeometricFigures cogf = new CollectionOfGeometricFigures(FigNumber);
+
+            for (int i =0; i < FigNumber; i++)
             {
                 Console.Clear();
+                Console.WriteLine($"Выберите фигуру {i+1}:");
                 Menu();
                 choice = Convert.ToInt32(Console.ReadLine());
                 switch (choice)
@@ -423,7 +429,7 @@ namespace NET6_Task1
                             {
                                 Triangle triangle = new Triangle(point1, point2, point3,
                                   colors[consoleColor]);
-                                userFigures.Figures.Add(triangle);
+                                cogf.Figures[i] = triangle;
                             }
                         }
                         break;
@@ -449,7 +455,7 @@ namespace NET6_Task1
                             {
                                 Diamond diamond = new Diamond(point1, radius1, radius2,
                                   colors[consoleColor]);
-                                userFigures.Figures.Add(diamond);
+                                cogf.Figures[i] = diamond;
                             }
                         }
                         break;
@@ -475,21 +481,68 @@ namespace NET6_Task1
                             {
                                 Rectangle rectangle = new Rectangle(point1, side1, side2,
                                   colors[consoleColor]);
-                                userFigures.Figures.Add(rectangle);
+                                cogf.Figures[i] = rectangle;
                             }
                         }
                         break;
                     case 4:
                         {
+                            Console.WriteLine("Вы выбрали трапецию.\n" +
+                                   "Задайте ее параметры: ");
 
+                            Console.Write("Верхняя левая вершина (разделитель - ','): ");
+                            string TempStr = Console.ReadLine();
+                            Point leftUp = new Point(TempStr);
+
+                            Console.Write("Верхняя правая вершина (разделитель - ','): ");
+                            TempStr = Console.ReadLine();
+                            Point rightUp = new Point(TempStr);
+
+                            Console.Write("Нижняя левая вершина (разделитель - ','): ");
+                            TempStr = Console.ReadLine();
+                            Point leftDown = new Point(TempStr);
+
+                            Console.WriteLine("Выберите цвет фигуры. Внесите число от 0 до 14: ");
+                            int consoleColor = Convert.ToInt32(Console.ReadLine());
+
+                            if (consoleColor >= 0 && consoleColor <= 14)
+                            {
+                                Trapezoid trapezoid = new Trapezoid(leftUp, rightUp, leftDown,
+                                  colors[consoleColor]);
+                                cogf.Figures[i] = trapezoid;
+                            }
                         }
                         break;
                     case 5:
-                        { }
+                        {
+                            Console.WriteLine("Вы выбрали многоугольник.\n" +
+                                    "Задайте его параметры: ");
+
+                            Console.Write("Количество вершин: ");
+                            int number = Convert.ToInt32(Console.ReadLine());
+
+                            Point[] vertexes = new Point[number];
+
+                            string TempStr = string.Empty;
+
+                            for(int j = 0; j < number; j++)
+                            {
+                                Console.Write($"Вершина {j+1} (разделитель - ','): ");
+                                TempStr = Console.ReadLine();
+                                vertexes[j] = new Point(TempStr);               
+                            }
+
+                            Console.WriteLine("Выберите цвет фигуры. Внесите число от 0 до 14: ");
+                            int consoleColor = Convert.ToInt32(Console.ReadLine());
+
+                            if (consoleColor >= 0 && consoleColor <= 14)
+                            {
+                                Polygon polygon = new Polygon(vertexes, number,
+                                  colors[consoleColor]);
+                                cogf.Figures[i] = polygon;
+                            }
+                        }
                         break;
-                    case 9:
-                        userFigures.ShowAllFigures();
-                        return;
                     case 0:
                         return;
                     default:
@@ -499,6 +552,8 @@ namespace NET6_Task1
                         break;
                 }
             }
+
+            cogf.ShowAllFigures();
         }
     }
 }
